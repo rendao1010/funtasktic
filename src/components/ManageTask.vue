@@ -1,5 +1,5 @@
 <template>
-  <div id="newTasks">
+  <div id="newTasks" :key="`{componentKey}-1`">
       <h2>New Tasks</h2>
       <ul>
         <li v-for="task in newTaskList" :key="task.Title">
@@ -8,7 +8,7 @@
         </li>
       </ul>
   </div>
-  <div id="ongoingTasks">
+  <div id="ongoingTasks" :key="`{componentKey}-2`">
       <h2>Ongoing Tasks</h2>
       <ul>
         <li v-for="task in ongoingTaskList" :key="task.Title">
@@ -17,7 +17,7 @@
         </li>
       </ul>
   </div>
-  <div id="completedTasks">
+  <div id="completedTasks" :key="`{componentKey}-3`">
       <h2>Completed Tasks</h2>
       <ul>
         <li v-for="task in completedTaskList" :key="task.Title">
@@ -38,7 +38,8 @@ export default {
         return {
             newTaskList: [],
             ongoingTaskList: [],
-            completedTaskList: []
+            completedTaskList: [],
+            componentKey: 0
         }
     },
 
@@ -56,13 +57,13 @@ export default {
         },
 
         async getOngoingTasks() {
-            var q = query(collection(db, "Tasks"), where("Status", "==", "Ongoing"))
+            var q = query(collection(db, "Tasks"), where("Status", "==", "ongoing"))
             var querySnapshot = await getDocs(q)
             querySnapshot.docs.forEach((document) => this.ongoingTaskList.push(document.data()))
         },
 
         async getCompletedTasks() {
-            var q = query(collection(db, "Tasks"), where("Status", "==", "Completed"))
+            var q = query(collection(db, "Tasks"), where("Status", "==", "completed"))
             var querySnapshot = await getDocs(q)
             querySnapshot.forEach((document) => this.completedTaskList.push(document.data()))
         },
@@ -72,6 +73,8 @@ export default {
             await updateDoc(taskRef, {
                 Status: "ongoing"
             })
+            this.componentKey += 1
+            window.location.reload()
         },
 
         async completeTask(taskTitle) {
@@ -79,6 +82,7 @@ export default {
             await updateDoc(taskRef, {
                 Status: "completed"
             })
+            this.componentKey += 1
         }
     }
 }
