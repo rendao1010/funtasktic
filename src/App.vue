@@ -1,15 +1,16 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <h1>Welcome to FunTaskTic!</h1>
+  <router-link to="/addtask">Add Task</router-link> |
+  <router-link to="/managetask">Manage Task</router-link>
+  <router-view/>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    
   }
 }
 </script>
