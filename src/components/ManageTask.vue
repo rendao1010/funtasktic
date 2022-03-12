@@ -1,27 +1,42 @@
 <template>
-  <div id="newTasks" :key="`{componentKey}-1`">
+  <div id="newTasks">
       <h2>New Tasks</h2>
       <ul>
-        <li v-for="task in newTaskList" :key="task.Title">
+        <li v-for="task in newTaskList" :key="task">
             {{ task.Title }}
+            <ul class="tags">
+                <li v-for="tag in task.Tags" :key="tag" class="tag">
+                    {{ tag }}
+                </li>
+            </ul>
             <button v-on:click="startTask(task.Title)">Start Task</button>
         </li>
       </ul>
   </div>
-  <div id="ongoingTasks" :key="`{componentKey}-2`">
+  <div id="ongoingTasks">
       <h2>Ongoing Tasks</h2>
       <ul>
-        <li v-for="task in ongoingTaskList" :key="task.Title">
+        <li v-for="task in ongoingTaskList" :key="task">
             {{ task.Title }}
+            <ul class="tags">
+                <li v-for="tag in task.Tags" :key="tag" class="tag">
+                    {{ tag }}
+                </li>
+            </ul>
             <button v-on:click="completeTask(task.Title)">Complete Task</button>
         </li>
       </ul>
   </div>
-  <div id="completedTasks" :key="`{componentKey}-3`">
+  <div id="completedTasks">
       <h2>Completed Tasks</h2>
       <ul>
-        <li v-for="task in completedTaskList" :key="task.Title">
+        <li v-for="task in completedTaskList" :key="task">
             {{ task.Title }}
+            <ul class="tags">
+                <li v-for="tag in task.Tags" :key="tag" class="tag">
+                    {{ tag }}
+                </li>
+            </ul>
             <button>Delete Task</button>
         </li>
       </ul>
@@ -39,7 +54,6 @@ export default {
             newTaskList: [],
             ongoingTaskList: [],
             completedTaskList: [],
-            componentKey: 0
         }
     },
 
@@ -73,7 +87,6 @@ export default {
             await updateDoc(taskRef, {
                 Status: "ongoing"
             })
-            this.componentKey += 1
             window.location.reload()
         },
 
@@ -82,11 +95,28 @@ export default {
             await updateDoc(taskRef, {
                 Status: "completed"
             })
-            this.componentKey += 1
+            window.location.reload()
         }
     }
 }
 </script>
 
-<style>
+<style scoped>
+ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    padding: 0
+}
+
+.tag {
+    background: rgb(250, 104, 104);
+    padding: 5px;
+    border-radius: 4px;
+    color: white;
+    white-space: nowrap;
+    transition: 0.1s ease background
+}
 </style>
