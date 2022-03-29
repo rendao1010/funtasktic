@@ -1,9 +1,16 @@
 <template>
-  <ManageTask/>
+  <el-row justify="center">
+    <el-col
+      :span="24"
+      :lg="18"
+    >
+      <ManageTask />
+    </el-col>
+  </el-row>
 </template>
 
 <script>
-import ManageTask from '../components/ManageTask.vue'
+import ManageTask from '../components/task/ManageTask.vue'
 
 export default {
     name: 'App',
