@@ -1,16 +1,18 @@
 <template>
-<AddTask/>
+  <el-row justify="center">
+    <el-col
+      :span="12"
+      :md="12"
+      :sm="18"
+      :xs="24"
+    >
+      <AddTask />
+    </el-col>
+  </el-row>
 </template>
 
-<script>
-import AddTask from '../components/addTask.vue'
-
-export default {
-    name: 'App',
-    components: {
-        AddTask
-    }
-}
+<script setup>
+  import AddTask from '../components/Task/AddTask.vue'
 </script>
 
 <style>
