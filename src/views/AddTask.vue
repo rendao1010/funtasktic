@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-  import AddTask from '../components/Task/AddTask.vue'
+  import AddTask from '../components/task/AddTask.vue'
 </script>
 
 <style>
