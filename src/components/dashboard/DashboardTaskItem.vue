@@ -1,17 +1,19 @@
 <template>
   <div class="container">
     <div>
-      <typography type="title">
-        {{ props.title }}
-      </typography>
+      <el-link @click="props.onTaskClick(props.task)">
+        <typography type="title">
+          {{ props.task.Title }}
+        </typography>
+      </el-link>
       <typography type="subtitle">
-        {{ props.subtitle }}
+        {{ props.task['Due Date'] }}
       </typography>
     </div>
     <div class="actions">
       <div>
         <el-button
-          v-for="tag in props.tags"
+          v-for="tag in props.task.Tags"
           :key="tag"
           type="primary"
           round
@@ -20,41 +22,25 @@
           {{ tag }}
         </el-button>
       </div>
-      <el-icon
-        :color="props.color"
-        class="no-inherit"
-      >
-        <collection-tag />
-      </el-icon>
+      <task-priority-icon :priority="props.task.Priority" />
     </div>
   </div>
 </template>
 <script setup>
   import { CollectionTag } from '@element-plus/icons-vue';
   import Typography from '../../components/Typography.vue';
+  import TaskPriorityIcon from '../../components/task/TaskPriorityIcon.vue';
 
   const props = defineProps({
-    title: {
-      type: String,
-      default: '',
+    task: {
+      type: Object,
+      default: () => {},
     },
-    subtitle: {
-      type: String,
-      default: '',
-    },
-    tags: {
-      type: Array,
-      default() {
-        return [];
-      },
-    },
-    color: {
-      type: String,
-      default: '',
+    onTaskClick: {
+      type: Function,
+      default: () => {},
     },
   });
-
-
 </script>
 <style scoped>
 .container {
