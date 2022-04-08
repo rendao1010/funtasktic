@@ -12,7 +12,6 @@
     </typography>
     <div style="height: 48px;" />
   </div>
-
   <el-form label-position="top">
     <el-form-item label="Email">
       <el-input
@@ -26,10 +25,6 @@
       />
     </el-form-item>
     <el-form-item style="display: flex">
-      <el-checkbox
-        label="Remember password"
-        name="type"
-      />
       <div style="flex: 1" />
       <el-link
         href="https://google.com"
@@ -64,11 +59,54 @@
 import { ref } from 'vue';
 import Typography from '../../components/Typography.vue';
 
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getDocs, getFirestore, collection, where, query } from "firebase/firestore";
+import firebaseApp from '../../firebase.js';
+import { ElNotification } from 'element-plus';
+import { setUser } from '../../utils/user';
+import { useRouter } from 'vue-router';
+
+const auth = getAuth();
+const router = useRouter();
+
+const db = getFirestore(firebaseApp);
+
 const email = ref('');
 const password = ref('');
 
-function handleLogin() {
-//adding this part a bit later
+const handleLogin = async () => {
+  const user = await signInWithEmailAndPassword(auth, email.value, password.value)
+    .then((userCredential) => {
+      // Signed in 
+      const user = userCredential.user;
+      ElNotification.success({
+        title: 'Logged in successfully',
+        message: `Welcome ${user.email}!`,
+      });
+
+      return user;
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      ElNotification.error({
+        title: 'Error',
+        message: errorMessage,
+      });
+      return null;
+    });
+
+    if (user == null) {
+      return;
+    }
+
+  // Get ref
+  const q = query(collection(db, 'User'), where('Email', '==', user.email));
+  const result = await getDocs(q);
+  const refId = result.docs[0].ref.id;
+  user.refId = refId;
+  setUser(user);
+  router.push('/');
 }
 
 </script>
