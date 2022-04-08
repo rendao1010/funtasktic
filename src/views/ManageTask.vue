@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import ManageTask from '../components/task/ManageTask.vue'
+import ManageTask from '../components/Task/ManageTask.vue'
 
 export default {
     name: 'App',
