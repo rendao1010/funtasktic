@@ -14,7 +14,3 @@
 <script setup>
   import AddTask from '../components/task/AddTask.vue'
 </script>
-
-<style>
-
-</style>

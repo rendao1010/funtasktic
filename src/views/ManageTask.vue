@@ -4,22 +4,18 @@
       :span="24"
       :lg="18"
     >
-      <ManageTask />
+      <project-overview />
     </el-col>
   </el-row>
 </template>
 
 <script>
-import ManageTask from '../components/Task/ManageTask.vue'
+import ProjectOverview from '../components/project/ProjectOverview.vue'
 
 export default {
     name: 'App',
     components: {
-        ManageTask
+        ProjectOverview,
     }
 }
 </script>
-
-<style>
-
-</style>

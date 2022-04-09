@@ -9,7 +9,3 @@
 <script setup>
   import Dashboard from '../components/dashboard/Dashboard.vue'
 </script>
-
-<style>
-
-</style>
