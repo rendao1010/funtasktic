@@ -7,7 +7,7 @@
         </typography>
       </el-link>
       <typography type="subtitle">
-        {{ props.task['Due Date'] }}
+        {{ props.task['Due Date'].toLocaleDateString() }}
       </typography>
     </div>
     <div class="actions">
