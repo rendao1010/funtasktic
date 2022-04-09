@@ -4,7 +4,11 @@
       {{ props.title }}
     </typography>
     <div style="height: 24px;" />
+    <div v-if="isLoading">
+      <el-skeleton />
+    </div>
     <el-space
+      v-else
       direction="vertical"
       alignment="stretch"
       :spacer="divider"
@@ -16,30 +20,33 @@
         :key="task"
         class="task-item"
       >
-        <el-icon
-          :color="task.color"
-          class="no-inherit"
-        >
-          <collection-tag />
-        </el-icon>
+        <task-priority-icon :priority="task.Priority" />
+        <div style="width: 4px" />
         <div>
-          <typography type="title">
-            {{ task.Title }}
-          </typography>
+          <el-link @click="props.viewTask(task)">
+            <typography type="title">
+              {{ task.Title }}
+            </typography>
+          </el-link>
           <typography type="subtitle">
-            {{ task.Date }}
+            {{ task.Subtitle }}
           </typography>
         </div>
         <div class="spacer" />
-        <el-button
-          :icon="DArrowRight"
-          circle
-          @click="props.buttonAction(task.Title)"
-        />
+        <el-tooltip
+          :content="props.buttonTitle"
+        >
+          <el-button
+            :icon="Select"
+            circle
+            @click="props.buttonAction(task.Id)"
+          />
+        </el-tooltip>
       </div>
       <typography
         v-if="props.tasks.length === 0"
         type="title"
+        style="color: #909399"
       >
         No tasks to show
       </typography>
@@ -49,9 +56,10 @@
 
 <script setup>
 import { h } from 'vue';
-import { DArrowRight, CollectionTag } from '@element-plus/icons-vue';
-import { ElDivider } from 'element-plus/lib/components';
+import { Select, CollectionTag } from '@element-plus/icons-vue';
+import { ElLink, ElTooltip, ElSkeleton, ElDivider } from 'element-plus';
 import Typography from '../../components/Typography.vue';
+import TaskPriorityIcon from './TaskPriorityIcon.vue';
 
 const divider = h(ElDivider);
 
@@ -74,6 +82,14 @@ const props = defineProps({
     type: Function,
     default: () => {},
   },
+  viewTask: {
+    type: Function,
+    default: () => {},
+  },
+  isLoading: {
+    type: Boolean,
+    default: false,
+  }
 })
 
 </script>
