@@ -1,13 +1,12 @@
 <template>
   <el-space :size="16">
-    <el-button
-      :icon="Check"
-      circle
-      :type="props.activity.importance"
+    <el-avatar
+      :size="36"
+      :src="props.activity.userAvatar"
     />
     <div>
       <typography type="title">
-        {{ props.activity.user }} {{ props.activity.actions }}
+        {{ props.activity.user }} {{ props.activity.action }}
       </typography>
       <typography type="subtitle">
         {{ props.activity.date }}
