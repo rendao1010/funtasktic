@@ -10,7 +10,7 @@
         class="centered"
       >
         <typography type="display6">
-          54321
+          0
         </typography>
         <typography type="title">
           Total EXP accumulated
@@ -21,7 +21,7 @@
         class="centered"
       >
         <typography type="display6">
-          54321
+          0
         </typography>
         <typography type="title">
           EXP this week
@@ -45,4 +45,3 @@
     text-align: center;
   }
 </style>
-  
