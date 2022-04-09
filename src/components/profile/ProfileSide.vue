@@ -17,13 +17,6 @@
       <typography type="title">
         {{ props.user.gender }}
       </typography>
-      <div style="height: 16px" />
-      <typography type="title">
-        Division: {{ props.user.division }}
-      </typography>
-      <typography type="title">
-        Level: {{ props.user.level }}
-      </typography>
     </div>
   </div>
 </template>
