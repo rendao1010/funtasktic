@@ -19,7 +19,7 @@
           :loading="isLoading"
           :on-task-click="showTaskDialog"
         />
-        <dashboard-recent-activity :activities="activities" />
+        <dashboard-recent-activity :activities="events" />
       </el-space>
     </el-col>
     <el-col
@@ -75,7 +75,7 @@
       ref="addTaskDialog"
       :is-editing="true"
       :task="dialogTask"
-      :project-id="dialogTaskProjectId"
+      :project="dialogTaskProject"
     />
     <template #footer>
       <span class="dialog-footer">
@@ -103,7 +103,7 @@
   import firebaseApp from '../../firebase.js' 
   import { doc, getFirestore, collection, getDoc, getDocs, query, where } from 'firebase/firestore';
   import { getUser } from '../../utils/user'
-  import { docToTask, getUsers } from '../../utils/firebase/user'
+  import { docToTask, getUsers, getTasks } from '../../utils/firebase/user'
 
   const db = getFirestore(firebaseApp);
   const users = ref([]);
@@ -124,26 +124,23 @@
       const members = [];
       for (const memberRef of memberRefs) {
         const member = await getDoc(memberRef);
-        members.push(member.data());
+        members.push({
+          ...member.data(),
+          id: memberRef.id,
+        });
       }
 
       projects.push({
         id: doc.id,
         title: data.Title,
         subtitle: members.map(member => member["Full Name"]).join(', '),
+        members: members,
       });
     }
 
     return projects;
   }
 
-  const getTasks = async () => {
-    const q = query(collection(db, "Tasks"), where("Members", "array-contains", doc(db, "User", getUser().refId)));
-    const querySnapshot = await getDocs(q);
-    const tasks = [];
-
-    return querySnapshot.docs.map(doc => docToTask(doc, users.value));
-  }
   
   const tasks = ref([]);
 
@@ -155,14 +152,16 @@
     }
   ]);
 
-  const activities = ref([
-    {
-      user: 'Chris Hemsworth',
-      action: 'Added a new task',
-      date: 'Yesterday',
-      importance: 'primary',
-    }
-  ])
+  // const activities = ref([
+  //   {
+  //     user: 'Chris Hemsworth',
+  //     action: 'Added a new task',
+  //     date: 'Yesterday',
+  //     importance: 'primary',
+  //   }
+  // ]);
+
+  const events = ref([]);
 
   const isLoading = ref(true);
   const isTaskDialogVisible = ref(false);
@@ -170,12 +169,13 @@
   const addProjectDialog = ref(null);
   const addTaskDialog = ref(null);
   const dialogTask = ref({});
-  const dialogTaskProjectId = ref('');
+  const dialogTaskProject = ref('');
 
   onMounted(async () => {
     users.value = await getUsers();
     projects.value = await getProjects();
-    tasks.value = await getTasks();
+    tasks.value = await getTasks(users.value);
+    events.value = await getEvents(users.value, projects.value);
     isLoading.value = false;
   });
 
@@ -185,7 +185,7 @@
 
   const showTaskDialog = (task) => {
     dialogTask.value = task;
-    dialogTaskProjectId.value = task.projectId;
+    dialogTaskProject.value = projects.value.find(project => project.id === task.ProjectId);
     isTaskDialogVisible.value = true;
   }
 
@@ -196,8 +196,40 @@
   const trySubmit = async () => {
     if (await addTaskDialog.value.submit()) {
       isTaskDialogVisible.value = false;
-      tasks.value = await getTasks();
+      tasks.value = await getTasks(users.value);
     }
   }
+  
+  const getEvents = async(users, projects) => {
+    const projectIds = projects.map(project => project.id);
+    const q = query(collection(db, "Events"));
+    const querySnapshot = await getDocs(q);
 
+    if (querySnapshot.empty) {
+      return [];
+    }
+
+    const events = [];
+
+    for (const doc of querySnapshot.docs) {
+      const data = doc.data();
+
+      if (!projectIds.includes(data.projectId)) {
+        continue;
+      }
+
+      const taskName = tasks.value.find(task => task.Id === data.taskId).Title;
+      const action = data.type === 'taskComment' ? `commented on "${taskName}"` : `edited "${taskName}"`;
+
+      events.push({
+        user: users.find(user => user.ref.id === data.author)["Full Name"],
+        userAvatar: users.find(user => user.ref.id === data.author).avatar,
+        action: action,
+        date: data.timestamp.toDate().toLocaleDateString(),
+        importance: "primary",
+      });
+    }
+
+    return events;
+  }
 </script>

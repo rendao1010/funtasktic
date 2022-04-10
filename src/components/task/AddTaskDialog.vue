@@ -167,29 +167,50 @@
         <typography type="h2">
           Comments
         </typography>
+        <el-input
+          v-model="commentInput"
+          type="textarea"
+          placeholder="Add a comment..."
+        />
+        <el-button
+          type="primary"
+          @click="addComment()"
+        >
+          Comment
+        </el-button>
+        <div style="height: 24px" />
         <el-space
+          v-if="comments.length > 0"
           direction="vertical"
           alignment="stretch"
           :spacer="divider"
           :size="0"
         >
-          <div 
+          <div
             v-for="comment in comments"
             :key="comment"
           >
             <TaskComment
               :author="comment.author"
               :content="comment.content"
+              :timestamp="comment.timestamp"
             />
           </div>
         </el-space>
+        <div
+          v-else
+        >
+          <Typography type="h4">
+            No comments yet.
+          </Typography>
+        </div>
       </task-section>
     </el-space>
   </el-form>
 </template>
 
 <script setup>
-import { h, ref } from 'vue';
+import { h, onMounted, ref } from 'vue';
 import Typography from '../../components/Typography.vue';
 import TaskSection from "./TaskSection.vue";
 import TaskComment from "../../components/task/TaskComment.vue";
@@ -200,20 +221,22 @@ import { ArrowDown } from '@element-plus/icons-vue'
 import { ElDivider, ElNotification } from 'element-plus'
 
 import firebaseApp from "../../firebase.js";
-import { collection, getFirestore, doc, setDoc, addDoc, updateDoc } from "firebase/firestore";
+import { arrayUnion, collection, getFirestore, doc, setDoc, addDoc, updateDoc, getDoc } from "firebase/firestore";
+import { getUser } from '../../utils/user';
+import { getUsers } from '../../utils/firebase/user';
 const db = getFirestore(firebaseApp);
 
 const divider = h(ElDivider);
 
 const props = defineProps({
-  projectId: {
-    type: String,
+  project: {
+    type: Object,
     required: true,
   },
   task: {
     type: Object,
     required: false,
-    default: () => ({}),
+    default: () => null,
   },
   isEditing: {
     type: Boolean,
@@ -233,11 +256,21 @@ const rules = ref({
 });
 
 const priorities = ['Urgent', 'Priority', 'Normal'];
-const comments = ref([]);
+const comments = ref(props.task.Comments ?? []);
+
+const tagInput = ref("");
+const commentInput = ref("");
+const users = ref([]);
+
+onMounted(async () => {
+  users.value = await getUsers();
+  users.value = users.value.filter(user => props.project.members.map(member => member.id).includes(user.ref.id));
+  if (props.task) {
+    comments.value = await getComments();
+  }
+});
 
 // Task details
-const tagInput = ref("");
-
 const model = ref({
   title: props.task.Title ?? "",
   description: props.task.Description ?? "",
@@ -245,7 +278,6 @@ const model = ref({
   tags: props.task.Tags ? [...props.task.Tags] : [],
   members: props.task.Members ? [...props.task.Members] : [],
   priority: props.task.Priority ?? priorities[0],
-  comments: [],
 });
 
 const addMember = (user) => {
@@ -256,7 +288,9 @@ const removeMember = (index) => {
   model.value.members.splice(index, 1);
 };
 
-const filterMembers = (u) => !model.value.members.includes(u);
+const filterMembers = (u) => {
+return !model.value.members.includes(u) && users.value.map(user => user.ref.id).includes(u.ref.id);
+};
 
 async function addTag(event) {
   event.preventDefault();
@@ -265,6 +299,20 @@ async function addTag(event) {
     model.value.tags.push(val);
     event.target.value = "";
   }
+}
+
+const getComments = async () => {
+  const q = doc(db, "Tasks", props.task.Id);
+  const querySnapshot = await getDoc(q);
+  const comments = querySnapshot.data().Comments;
+
+  for (const comment of comments) {
+    comment.author = users.value.find(u => u.ref.id === comment.author);
+  }
+
+  // Reverse
+  comments.reverse();
+  return comments;
 }
 
 function removeLastTag(event) {
@@ -279,6 +327,34 @@ function removeTag(index) {
 
 function handlePriorityChange(priority) {
   model.value.priority = priority;
+}
+
+const addComment = async () => {
+  if (commentInput.value.length > 0) {
+    const comment = {
+      author: getUser().refId,
+      content: commentInput.value,
+      timestamp: new Date(),
+    };
+
+    // Update using array union
+    await updateDoc(doc(db, "Tasks", props.task.Id), {
+      Comments: arrayUnion(comment),
+    });
+    await addDoc(collection(db, "Events"), {
+      type: "taskComment",
+      taskId: props.task.Id,
+      projectId: props.project.id,
+      author: getUser().refId,
+      timestamp: new Date(),
+    });
+
+    // Clear input
+    commentInput.value = "";
+
+    // Get comments
+    comments.value = await getComments();
+  }
 }
 
 async function submit() {
@@ -302,10 +378,11 @@ async function submit() {
         Label: priority,
         Status: "New",
         Tags: tags,
-        Project: doc(db, "Project", props.projectId),
+        Project: doc(db, "Project", props.project.id),
         Members: members.map((member) => member.ref),
+        Comments: [],
       });
-       ElNotification({
+      ElNotification({
         title: 'Task created',
         message: `Task "${title}" has been created`,
       })
@@ -317,6 +394,13 @@ async function submit() {
         Tags: tags,
         Label: priority,
         Members: members.map((member) => member.ref),
+      })
+      await addDoc(collection(db, "Events"), {
+        author: getUser().refId,
+        type: "taskUpdate",
+        taskId: props.task.Id,
+        projectId: props.project.id,
+        timestamp: new Date(),
       });
       ElNotification({
         title: 'Task updated',
