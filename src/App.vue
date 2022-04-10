@@ -26,7 +26,6 @@
 </template>
 
 <script>
-
 import NavBar from './components/NavBar.vue'
 
 export default {
@@ -38,7 +37,7 @@ export default {
 </script>
 
 <style>
-:root {
+:root, button {
   font-family: 'Poppins', sans-serif;
   --el-color-primary: #063F68 !important;
 }
@@ -68,6 +67,7 @@ button.el-button {
 
 .main.el-main {
   overflow: hidden;
+  margin-top: 72px;
 }
 
 </style>

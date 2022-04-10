@@ -51,15 +51,25 @@ export const getUsers = async () => {
   return result;
 };
 
+export const getOutstandingTasks = async (users) => {
+  const q = query(
+    collection(db, "Tasks"),
+    where("Members", "array-contains", doc(db, "User", getUser().refId)),
+    where("Status", "!=", "Completed"),
+    orderBy("Status"),
+    orderBy("Due Date"),
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => docToTask(doc, users));
+};
+
 export const getTasks = async (users) => {
   const q = query(
     collection(db, "Tasks"),
     where("Members", "array-contains", doc(db, "User", getUser().refId)),
-    orderBy("Due Date")
+    orderBy("Due Date"),
   );
   const querySnapshot = await getDocs(q);
-  const tasks = [];
-
   return querySnapshot.docs.map((doc) => docToTask(doc, users));
 };
 
@@ -69,6 +79,7 @@ export const docToTask = (doc, users) => {
   return {
     Id: id,
     Title: data.Name,
+    Description: data.Description,
     Subtitle: data["Due Date"].toDate().toLocaleDateString(),
     "Due Date": data["Due Date"].toDate(),
     Tags: data.Tags,
