@@ -9,10 +9,13 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^1.1.4",
+    "chart.js": "^3.7.1",
     "core-js": "^3.6.5",
     "element-plus": "^2.1.4",
     "firebase": "^9.6.8",
+    "v-calendar": "^2.4.1",
     "vue": "^3.0.0",
+    "vue-chartjs": "^4.0.5",
     "vue-router": "^4.0.14"
   },
   "devDependencies": {
