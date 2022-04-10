@@ -7,6 +7,7 @@ import {
   getFirestore,
   where,
   doc,
+  orderBy,
 } from "firebase/firestore";
 import {
   getStorage,
@@ -53,7 +54,8 @@ export const getUsers = async () => {
 export const getTasks = async (users) => {
   const q = query(
     collection(db, "Tasks"),
-    where("Members", "array-contains", doc(db, "User", getUser().refId))
+    where("Members", "array-contains", doc(db, "User", getUser().refId)),
+    orderBy("Due Date")
   );
   const querySnapshot = await getDocs(q);
   const tasks = [];
