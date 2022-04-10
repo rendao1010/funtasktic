@@ -13,15 +13,9 @@
     "core-js": "^3.6.5",
     "element-plus": "^2.1.4",
     "firebase": "^9.6.8",
-<<<<<<< HEAD
-    "v-calendar": "^2.4.1",
-    "vue": "^3.0.0",
-    "vue-chartjs": "^4.0.5",
-=======
     "v-calendar": "^3.0.0-alpha.8",
     "vue": "^3.0.0",
     "vue-chartjs": "^4.0.4",
->>>>>>> 744bf9ea82ad3d1186ac16c4db70b431ea78badc
     "vue-router": "^4.0.14"
   },
   "devDependencies": {
