@@ -66,7 +66,7 @@
   import Typography from '../../components/Typography.vue';
   import DashboardProjectItem from '../dashboard/DashboardProjectItem.vue';
 
-  import { ElSkeleton, ElSkeletonItem } from 'element-plus/lib/components';
+  import { ElSkeleton, ElSkeletonItem } from 'element-plus';
   import { Plus } from '@element-plus/icons-vue';
   
   const props = defineProps({
