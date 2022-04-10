@@ -42,3 +42,4 @@
         return typeMap[props.priority];
     });
 </script>
+

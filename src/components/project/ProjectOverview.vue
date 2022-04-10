@@ -23,6 +23,7 @@
       >
         {{ project.description }}
       </typography>
+      <el-skeleton v-if="isLoading" />
       <div>
         <p>Members</p>
         <ul>
@@ -34,7 +35,6 @@
           </li>
         </ul>
       </div>
-      <el-skeleton v-if="isLoading" />
       <div
         v-if="isAdmin"
         id="projectActions"
@@ -163,7 +163,7 @@ import TaskListCard from '../task/TaskListCard.vue';
 
 import { getUsers, docToTask } from '../../utils/firebase/user.js';
 import firebaseApp from '../../firebase.js'
-import { getFirestore, collection, getDoc, getDocs, doc, updateDoc, query, where } from 'firebase/firestore';
+import { getFirestore, collection, getDoc, getDocs, doc, updateDoc, query, where, orderBy } from 'firebase/firestore';
 import { getUser } from '../../utils/user';
 const db = getFirestore(firebaseApp);
 
@@ -218,19 +218,19 @@ const getProject = async (projectId) => {
 }
 
 const getNewTasks = async (projectId) => {
-  const q = query(collection(db, "Tasks"), where("Status", "==", "New"), where("Project", "==", doc(db, "Project", projectId)));
+  const q = query(collection(db, "Tasks"), where("Status", "==", "New"), where("Project", "==", doc(db, "Project", projectId)), orderBy("Due Date"));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => docToTask(doc, users.value));
 }
 
 const getOngoingTasks = async (projectId) => {
-  const q = query(collection(db, "Tasks"), where("Status", "==", "Ongoing"), where("Project", "==", doc(db, "Project", projectId)));
+  const q = query(collection(db, "Tasks"), where("Status", "==", "Ongoing"), where("Project", "==", doc(db, "Project", projectId)), orderBy("Due Date"));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => docToTask(doc, users.value));
 }
 
 const getCompletedTasks = async (projectId) => {
-  const q = query(collection(db, "Tasks"), where("Status", "==", "Completed"), where("Project", "==", doc(db, "Project", projectId)));
+  const q = query(collection(db, "Tasks"), where("Status", "==", "Completed"), where("Project", "==", doc(db, "Project", projectId)), orderBy("Due Date"));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => docToTask(doc, users.value));
 }

@@ -120,12 +120,13 @@ const trySubmit = async () => {
     // Create a root reference
     const storage = getStorage();
 
-    // Create a reference to 'mountains.jpg'
-
     const imageRef = storageRef(storage, getUser().uid + '.jpg');
 
     uploadBytes(imageRef, fileList.value[0].raw).then((snapshot) => {
-      console.log('Uploaded a blob or file!');
+      ElNotification.success({
+        title: 'Success',
+        message: 'Avatar updated successfully'
+      });
     });
   }
 }
