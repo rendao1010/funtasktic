@@ -5,7 +5,7 @@
     </typography>
     <div style="height: 24px" />
     <el-space
-      v-if="props.activities.length"
+      v-if="props.activities.length > 0"
       :size="36"
       direction="vertical"
       alignment="stretch"
@@ -19,9 +19,12 @@
     <div
       v-else
     >
-      <Typography type="h4">
-        No recent activity.
-      </Typography>
+      <typography
+        type="title"
+        style="color: #909399"
+      >
+        No recent activity
+      </typography>
     </div>
   </el-card>
 </template>

@@ -15,7 +15,7 @@
         style="width: 100%"
       >
         <dashboard-task-list
-          :tasks="tasks"
+          :tasks="outstandingTasks"
           :loading="isLoading"
           :on-task-click="showTaskDialog"
         />
@@ -103,7 +103,7 @@
   import firebaseApp from '../../firebase.js' 
   import { doc, getFirestore, collection, getDoc, getDocs, query, where } from 'firebase/firestore';
   import { getUser } from '../../utils/user'
-  import { docToTask, getUsers, getTasks } from '../../utils/firebase/user'
+  import { getOutstandingTasks, getUsers, getTasks } from '../../utils/firebase/user'
 
   const db = getFirestore(firebaseApp);
   const users = ref([]);
@@ -142,7 +142,7 @@
   }
 
   
-  const tasks = ref([]);
+  const outstandingTasks = ref([]);
 
   const projects = ref([
     {
@@ -151,15 +151,6 @@
       description: 'Outstanding tasks: 4'
     }
   ]);
-
-  // const activities = ref([
-  //   {
-  //     user: 'Chris Hemsworth',
-  //     action: 'Added a new task',
-  //     date: 'Yesterday',
-  //     importance: 'primary',
-  //   }
-  // ]);
 
   const events = ref([]);
 
@@ -174,7 +165,7 @@
   onMounted(async () => {
     users.value = await getUsers();
     projects.value = await getProjects();
-    tasks.value = await getTasks(users.value);
+    outstandingTasks.value = await getOutstandingTasks(users.value);
     events.value = await getEvents(users.value, projects.value);
     isLoading.value = false;
   });
@@ -196,7 +187,7 @@
   const trySubmit = async () => {
     if (await addTaskDialog.value.submit()) {
       isTaskDialogVisible.value = false;
-      tasks.value = await getTasks(users.value);
+      outstandingTasks.value = await getOutstandingTasks(users.value);
     }
   }
   
@@ -204,6 +195,9 @@
     const projectIds = projects.map(project => project.id);
     const q = query(collection(db, "Events"));
     const querySnapshot = await getDocs(q);
+
+    const tasks = await getTasks(users);
+    const taskIds = tasks.map(task => task.id);
 
     if (querySnapshot.empty) {
       return [];
@@ -214,11 +208,11 @@
     for (const doc of querySnapshot.docs) {
       const data = doc.data();
 
-      if (!projectIds.includes(data.projectId)) {
+      if (!projectIds.includes(data.projectId) || !taskIds.includes(data.taskId)) {
         continue;
       }
 
-      const taskName = tasks.value.find(task => task.Id === data.taskId).Title;
+      const taskName = tasks.find(task => task.Id === data.taskId).Title;
       const action = data.type === 'taskComment' ? `commented on "${taskName}"` : `edited "${taskName}"`;
 
       events.push({
